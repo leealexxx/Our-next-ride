@@ -1,0 +1,13 @@
+{
+  "name": "Our-next-ride",
+  "short_name": "Our-next-ride",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#063240",
+  "theme_color": "#063240",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png"}
+  ]
+}

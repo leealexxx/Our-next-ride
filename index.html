@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Our-next-ride">
+<meta name="theme-color" content="#063240">
+<meta name="robots" content="noindex, nofollow">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Our-next-ride</title>
+<style>
+:root{
+  --bg:#f1f5f9; --card:#ffffff; --text:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --accent:#2563eb; --good:#16a34a; --warn:#d97706; --bad:#dc2626; --chip:#f1f5f9;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0b1220; --card:#151e2e; --text:#e5e7eb; --muted:#94a3b8; --line:#243045;
+         --accent:#60a5fa; --good:#4ade80; --warn:#fbbf24; --bad:#f87171; --chip:#1e293b; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","PingFang HK","Noto Sans TC",sans-serif;
+  -webkit-text-size-adjust:100%;}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:560px;margin:0 auto;padding:12px 14px 40px}
+header{display:flex;align-items:center;gap:8px;padding:6px 0 10px}
+header h1{font-size:22px;margin:0;flex:1;letter-spacing:-.3px}
+.iconbtn{border:1px solid var(--line);background:var(--card);border-radius:12px;min-width:40px;height:40px;padding:0 10px;font-size:15px}
+.status{font-size:12.5px;color:var(--muted);margin:-4px 0 10px;display:flex;gap:6px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--good);display:inline-block}
+.dot.err{background:var(--bad)} .dot.load{background:var(--warn)}
+.alert{background:#fef3c7;color:#78350f;border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px;line-height:1.4}
+.alert.ok{background:transparent;color:var(--muted);padding:0 2px;font-size:12.5px}
+@media (prefers-color-scheme: dark){ .alert{background:#3b2a07;color:#fde68a} .alert.ok{background:transparent;color:var(--muted)} }
+.alert a{color:inherit;font-weight:600}
+.card{background:var(--card);border-radius:16px;padding:12px 14px;margin-bottom:10px;box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.chead{display:flex;align-items:center;gap:10px}
+.badge{min-width:52px;height:30px;padding:0 8px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#fff;white-space:nowrap}
+.badge.ctb{background:#ffd200;color:#1f2937}
+.badge.kmb{background:#e1251b}
+.ctitle{flex:1;min-width:0}
+.ctitle .t1{font-weight:650;font-size:15.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctitle .t2{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.walk{font-size:12px;color:var(--muted);background:var(--chip);border-radius:999px;padding:3px 8px;white-space:nowrap}
+.row{display:flex;align-items:flex-end;justify-content:space-between;gap:10px;margin-top:10px}
+.row + .row{border-top:1px solid var(--line);padding-top:10px}
+.dirlbl{font-size:12.5px;color:var(--muted);margin-bottom:2px}
+.leave{font-size:24px;font-weight:750;letter-spacing:-.4px;line-height:1.15}
+.leave.now{color:var(--bad)} .leave.soon{color:var(--warn)} .leave.ok{color:var(--good)} .leave.none{color:var(--muted);font-size:17px;font-weight:600}
+.arr{text-align:right;font-size:13.5px;color:var(--muted);line-height:1.35;white-space:nowrap}
+.arr b{color:var(--text);font-size:16px}
+.note{font-size:12.5px;color:var(--muted);margin-top:4px}
+.err{color:var(--bad)}
+.empty{text-align:center;padding:30px 10px;color:var(--muted)}
+.btn{border:0;border-radius:12px;padding:11px 14px;background:var(--accent);color:#fff;font-weight:600}
+.btn.sec{background:var(--chip);color:var(--text);border:1px solid var(--line)}
+.btn.danger{background:transparent;color:var(--bad);border:1px solid var(--line)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+footer{font-size:11.5px;color:var(--muted);text-align:center;margin-top:16px;line-height:1.5}
+footer a{color:inherit}
+/* overlay */
+.sheet{position:fixed;inset:0;background:var(--bg);overflow:auto;z-index:10;display:none;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.sheet.open{display:block}
+.sheet h2{font-size:20px;margin:0;flex:1}
+.sec{background:var(--card);border-radius:14px;padding:12px;margin-bottom:12px}
+.sec h3{font-size:13px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin:0 0 8px}
+.item{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.item:first-of-type{border-top:0}
+.item .lbl{flex:1;min-width:0;font-size:14.5px}
+.item .lbl small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sm{border:1px solid var(--line);background:var(--chip);border-radius:9px;min-width:34px;height:34px;padding:0 8px;font-size:14px}
+label.f{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+select,input[type=text],input[type=number],textarea{width:100%;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px;font-size:16px}
+textarea{min-height:84px;font-family:ui-monospace,Menlo,monospace;font-size:12.5px;word-break:break-all}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;border:0;background:transparent;padding:9px}
+.seg button[aria-pressed=true]{background:var(--accent);color:#fff}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.45}
+.msg{font-size:13px;margin-top:8px;min-height:1em}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <h1 id="h-title">Our-next-ride</h1>
+    <button type="button" class="iconbtn" id="b-lang" aria-label="Language">EN</button>
+    <button type="button" class="iconbtn" id="b-refresh" aria-label="Refresh">⟳</button>
+    <button type="button" class="iconbtn" id="b-settings" aria-label="Settings">⚙︎</button>
+  </header>
+  <div class="status" aria-live="polite"><span class="dot" id="s-dot"></span><span id="s-text"></span></div>
+  <div id="alerts"></div>
+  <div id="cards"></div>
+  <footer id="foot"></footer>
+</div>
+
+<!-- Settings -->
+<div class="sheet" id="settings" role="dialog" aria-modal="true" aria-labelledby="st-title">
+  <div class="wrap">
+    <header><h2 id="st-title"></h2><button type="button" class="btn" id="st-done"></button></header>
+    <div class="sec">
+      <h3 id="st-lang-h"></h3>
+      <div class="seg" id="st-lang">
+        <button type="button" data-lang="zh">繁體中文</button>
+        <button type="button" data-lang="en">English</button>
+      </div>
+    </div>
+    <div class="sec">
+      <h3 id="st-items-h"></h3>
+      <div id="st-items"></div>
+      <div class="btns" style="margin-top:10px">
+        <button type="button" class="btn sec" id="st-add-bus"></button>
+        <button type="button" class="btn sec" id="st-add-mtr"></button>
+      </div>
+    </div>
+    <div class="sec">
+      <h3 id="st-code-h"></h3>
+      <p class="hint" id="st-code-hint"></p>
+      <textarea id="st-code" aria-label="Setup code" spellcheck="false" autocapitalize="off" autocomplete="off"></textarea>
+      <div class="btns" style="margin-top:8px">
+        <button type="button" class="btn" id="st-import"></button>
+        <button type="button" class="btn sec" id="st-export"></button>
+      </div>
+      <div class="msg" id="st-msg" aria-live="polite"></div>
+    </div>
+    <div class="sec">
+      <button type="button" class="btn danger" id="st-reset"></button>
+    </div>
+  </div>
+</div>
+
+<!-- Editor -->
+<div class="sheet" id="editor" role="dialog" aria-modal="true" aria-labelledby="ed-title">
+  <div class="wrap">
+    <header><h2 id="ed-title"></h2><button type="button" class="btn sec" id="ed-cancel"></button></header>
+    <form id="ed-form" class="sec" novalidate>
+      <div id="ed-bus">
+        <label class="f" for="ed-co" id="l-co"></label>
+        <select id="ed-co"><option value="KMB">九巴 KMB</option><option value="CTB">城巴 Citybus</option></select>
+        <label class="f" for="ed-route" id="l-route"></label>
+        <input type="text" id="ed-route" list="ed-routes" autocomplete="off" autocapitalize="characters" inputmode="text" maxlength="6">
+        <datalist id="ed-routes"></datalist>
+        <label class="f" for="ed-dir" id="l-dir"></label>
+        <select id="ed-dir"></select>
+        <label class="f" for="ed-stop" id="l-stop"></label>
+        <select id="ed-stop"></select>
+      </div>
+      <div id="ed-mtr">
+        <label class="f" for="ed-line" id="l-line"></label>
+        <select id="ed-line"></select>
+        <label class="f" for="ed-sta" id="l-sta"></label>
+        <select id="ed-sta"></select>
+        <label class="f" for="ed-mdir" id="l-mdir"></label>
+        <select id="ed-mdir"></select>
+      </div>
+      <label class="f" for="ed-walk" id="l-walk"></label>
+      <input type="number" id="ed-walk" min="0" max="60" step="1" inputmode="numeric">
+      <div class="msg" id="ed-msg" aria-live="polite"></div>
+      <div class="btns" style="margin-top:12px"><button type="submit" class="btn" id="ed-save"></button></div>
+    </form>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ---------------- constants ---------------- */
+var KMB = "https://data.etabus.gov.hk/v1/transport/kmb/";
+var CTB = "https://rt.data.gov.hk/v2/transport/citybus/";
+var MTR = "https://rt.data.gov.hk/v1/transport/mtr/getSchedule.php";
+var FETCH_EVERY = 30000, RENDER_EVERY = 10000;
+var LS_CFG = "nextride.cfg.v1", LS_STOP = "nextride.stops.v1", LS_ROUTES = "nextride.routes.v1";
+
+var STA = {
+ HOK:["香港","Hong Kong"],KOW:["九龍","Kowloon"],TSY:["青衣","Tsing Yi"],AIR:["機場","Airport"],AWE:["博覽館","AsiaWorld-Expo"],
+ OLY:["奧運","Olympic"],NAC:["南昌","Nam Cheong"],LAK:["荔景","Lai King"],SUN:["欣澳","Sunny Bay"],TUC:["東涌","Tung Chung"],
+ WKS:["烏溪沙","Wu Kai Sha"],MOS:["馬鞍山","Ma On Shan"],HEO:["恆安","Heng On"],TSH:["大水坑","Tai Shui Hang"],SHM:["石門","Shek Mun"],
+ CIO:["第一城","City One"],STW:["沙田圍","Sha Tin Wai"],CKT:["車公廟","Che Kung Temple"],TAW:["大圍","Tai Wai"],HIK:["顯徑","Hin Keng"],
+ DIH:["鑽石山","Diamond Hill"],KAT:["啟德","Kai Tak"],SUW:["宋皇臺","Sung Wong Toi"],TKW:["土瓜灣","To Kwa Wan"],HOM:["何文田","Ho Man Tin"],
+ HUH:["紅磡","Hung Hom"],ETS:["尖東","East Tsim Sha Tsui"],AUS:["柯士甸","Austin"],MEF:["美孚","Mei Foo"],TWW:["荃灣西","Tsuen Wan West"],
+ KSR:["錦上路","Kam Sheung Road"],YUL:["元朗","Yuen Long"],LOP:["朗屏","Long Ping"],TIS:["天水圍","Tin Shui Wai"],SIH:["兆康","Siu Hong"],TUM:["屯門","Tuen Mun"],
+ NOP:["北角","North Point"],QUB:["鰂魚涌","Quarry Bay"],YAT:["油塘","Yau Tong"],TIK:["調景嶺","Tiu Keng Leng"],TKO:["將軍澳","Tseung Kwan O"],
+ LHP:["康城","LOHAS Park"],HAH:["坑口","Hang Hau"],POA:["寶琳","Po Lam"],
+ ADM:["金鐘","Admiralty"],EXC:["會展","Exhibition Centre"],MKK:["旺角東","Mong Kok East"],KOT:["九龍塘","Kowloon Tong"],SHT:["沙田","Sha Tin"],
+ FOT:["火炭","Fo Tan"],RAC:["馬場","Racecourse"],UNI:["大學","University"],TAP:["大埔墟","Tai Po Market"],TWO:["太和","Tai Wo"],FAN:["粉嶺","Fanling"],
+ SHS:["上水","Sheung Shui"],LOW:["羅湖","Lo Wu"],LMC:["落馬洲","Lok Ma Chau"],
+ OCP:["海洋公園","Ocean Park"],WCH:["黃竹坑","Wong Chuk Hang"],LET:["利東","Lei Tung"],SOH:["海怡半島","South Horizons"],
+ CEN:["中環","Central"],TST:["尖沙咀","Tsim Sha Tsui"],JOR:["佐敦","Jordan"],YMT:["油麻地","Yau Ma Tei"],MOK:["旺角","Mong Kok"],PRE:["太子","Prince Edward"],
+ SSP:["深水埗","Sham Shui Po"],CSW:["長沙灣","Cheung Sha Wan"],LCK:["荔枝角","Lai Chi Kok"],KWF:["葵芳","Kwai Fong"],KWH:["葵興","Kwai Hing"],
+ TWH:["大窩口","Tai Wo Hau"],TSW:["荃灣","Tsuen Wan"],
+ KET:["堅尼地城","Kennedy Town"],HKU:["香港大學","HKU"],SYP:["西營盤","Sai Ying Pun"],SHW:["上環","Sheung Wan"],WAC:["灣仔","Wan Chai"],
+ CAB:["銅鑼灣","Causeway Bay"],TIH:["天后","Tin Hau"],FOH:["炮台山","Fortress Hill"],TAK:["太古","Tai Koo"],SWH:["西灣河","Sai Wan Ho"],
+ SKW:["筲箕灣","Shau Kei Wan"],HFC:["杏花邨","Heng Fa Chuen"],CHW:["柴灣","Chai Wan"],
+ WHA:["黃埔","Whampoa"],SKM:["石硤尾","Shek Kip Mei"],LOF:["樂富","Lok Fu"],WTS:["黃大仙","Wong Tai Sin"],CHH:["彩虹","Choi Hung"],
+ KOB:["九龍灣","Kowloon Bay"],NTK:["牛頭角","Ngau Tau Kok"],KWT:["觀塘","Kwun Tong"],LAT:["藍田","Lam Tin"],DIS:["迪士尼","Disneyland Resort"]
+};
+var LINES = {
+ TML:{n:["屯馬綫","Tuen Ma Line"],c:"#923011",up:["TUM"],dn:["WKS"],s:"WKS MOS HEO TSH SHM CIO STW CKT TAW HIK DIH KAT SUW TKW HOM HUH ETS AUS NAC MEF TWW KSR YUL LOP TIS SIH TUM"},
+ KTL:{n:["觀塘綫","Kwun Tong Line"],c:"#00AB4E",up:["TIK"],dn:["WHA"],s:"WHA HOM YMT MOK PRE SKM KOT LOF WTS DIH CHH KOB NTK KWT LAT YAT TIK"},
+ TWL:{n:["荃灣綫","Tsuen Wan Line"],c:"#E2231A",up:["TSW"],dn:["CEN"],s:"CEN ADM TST JOR YMT MOK PRE SSP CSW LCK MEF LAK KWF KWH TWH TSW"},
+ ISL:{n:["港島綫","Island Line"],c:"#0071CE",up:["CHW"],dn:["KET"],s:"KET HKU SYP SHW CEN ADM WAC CAB TIH FOH NOP QUB TAK SWH SKW HFC CHW"},
+ TKL:{n:["將軍澳綫","Tseung Kwan O Line"],c:"#7D499D",up:["POA","LHP"],dn:["NOP"],s:"NOP QUB YAT TIK TKO LHP HAH POA"},
+ EAL:{n:["東鐵綫","East Rail Line"],c:"#53B7E8",up:["LOW","LMC"],dn:["ADM"],s:"ADM EXC HUH MKK KOT TAW SHT FOT RAC UNI TAP TWO FAN SHS LOW LMC"},
+ SIL:{n:["南港島綫","South Island Line"],c:"#BAC429",up:["SOH"],dn:["ADM"],s:"ADM OCP WCH LET SOH"},
+ TCL:{n:["東涌綫","Tung Chung Line"],c:"#F7943E",up:["TUC"],dn:["HOK"],s:"HOK KOW OLY NAC LAK TSY SUN TUC"},
+ AEL:{n:["機場快綫","Airport Express"],c:"#00888A",up:["AWE"],dn:["HOK"],s:"HOK KOW TSY AIR AWE"},
+ DRL:{n:["迪士尼綫","Disneyland Resort Line"],c:"#F173AC",up:["DIS"],dn:["SUN"],s:"SUN DIS"}
+};
+
+var TX = {
+ zh:{title:"Our-next-ride",updated:"更新於",loading:"更新中…",failed:"部分資料未能更新",settings:"設定",done:"完成",lang:"語言",
+  items:"我的車站 / 路線",addBus:"+ 巴士",addMtr:"+ 港鐵",code:"設定碼",
+  codeHint:"設定只儲存在此手機，不會放在網上。貼上設定碼後按「匯入」；或按「匯出」把現有設定分享給另一部手機。",
+  imp:"匯入",exp:"匯出 / 複製",reset:"清除所有設定",resetQ:"確定清除此手機上的所有設定？",
+  impOk:"已匯入 ✓",impBad:"設定碼無效",copied:"已複製到剪貼簿 ✓",copyManual:"已顯示設定碼，請手動複製",
+  leaveIn:function(m){return m+" 分鐘後出發";},leaveNow:"即刻出發",
+  arrIn:function(m){return m<=0?"即將到站":m+" 分鐘";},at:"到站",
+  noCatch:function(m){return "下一班 "+m+" 分鐘後到，步行趕不及";},noSvc:"暫無班次資料",
+  walk:function(m){return "步行 "+m+" 分";},to:function(d){return "往 "+d;},both:"雙向",
+  plat:function(p){return p+" 號月台";},stopNF:"找不到車站，請在設定中重新選擇",loadErr:"未能載入",
+  empty:"未有任何車站。請到設定匯入設定碼，或自行加入車站。",openSettings:"開啟設定",
+  co:"巴士公司",route:"路線",dir:"方向",stop:"上車站",line:"港鐵綫",sta:"車站",mdir:"方向",walkMin:"步行時間（分鐘）",
+  save:"儲存",cancel:"取消",editBus:"巴士路線",editMtr:"港鐵車站",choose:"請選擇…",loadingS:"載入中…",
+  routeNF:"找不到此路線",needAll:"請完成所有欄位",edit:"編輯",del:"刪除",delQ:"刪除此項？",special:"特別班",
+  delay:function(l){return l+"：列車服務延誤";},mtrOk:"港鐵服務正常（只限所選路綫）",mtrLink:"港鐵服務狀況",
+  src:"資料來源：DATA.GOV.HK（九巴、城巴、港鐵）。每 30 秒自動更新。"},
+ en:{title:"Our-next-ride",updated:"Updated",loading:"Updating…",failed:"Some data failed to update",settings:"Settings",done:"Done",lang:"Language",
+  items:"My stops & routes",addBus:"+ Bus",addMtr:"+ MTR",code:"Setup code",
+  codeHint:"Settings are stored only on this phone, never online. Paste a setup code and tap Import, or Export to share your setup with another phone.",
+  imp:"Import",exp:"Export / Copy",reset:"Clear all settings",resetQ:"Clear all settings on this phone?",
+  impOk:"Imported ✓",impBad:"Invalid setup code",copied:"Copied to clipboard ✓",copyManual:"Code shown above — copy it manually",
+  leaveIn:function(m){return "Leave in "+m+" min";},leaveNow:"Leave now",
+  arrIn:function(m){return m<=0?"Arriving":m+" min";},at:"Arrives",
+  noCatch:function(m){return "Next one in "+m+" min — can't make it on foot";},noSvc:"No departures scheduled",
+  walk:function(m){return m+" min walk";},to:function(d){return "to "+d;},both:"Both directions",
+  plat:function(p){return "Platform "+p;},stopNF:"Stop not found — pick it again in Settings",loadErr:"Couldn't load",
+  empty:"No stops yet. Import a setup code in Settings, or add stops yourself.",openSettings:"Open Settings",
+  co:"Operator",route:"Route",dir:"Direction",stop:"Boarding stop",line:"MTR line",sta:"Station",mdir:"Direction",walkMin:"Walking time (min)",
+  save:"Save",cancel:"Cancel",editBus:"Bus route",editMtr:"MTR station",choose:"Choose…",loadingS:"Loading…",
+  routeNF:"Route not found",needAll:"Please complete all fields",edit:"Edit",del:"Delete",delQ:"Delete this item?",special:"special",
+  delay:function(l){return l+": train service delayed";},mtrOk:"MTR: normal service on your lines",mtrLink:"MTR service status",
+  src:"Data: DATA.GOV.HK (KMB, Citybus, MTR). Refreshes every 30 seconds."}
+};
+
+/* ---------------- state ---------------- */
+var $ = function(id){ return document.getElementById(id); };
+var cfg = loadJSON(LS_CFG, null) || {lang:"zh", items:[]};
+if(!Array.isArray(cfg.items)) cfg.items = [];
+if(cfg.lang!=="zh" && cfg.lang!=="en") cfg.lang = "zh";
+var stopCache = loadJSON(LS_STOP, {}) || {};
+var results = {};          // item uid -> {ok, arrivals | dirs, error, alert}
+var lastOk = 0, lastTry = 0, fetching = false, anyErr = false;
+var L = function(){ return TX[cfg.lang]; };
+var li = function(pair){ return pair ? (cfg.lang==="zh" ? pair[0] : pair[1]) : ""; };
+
+function loadJSON(k, d){ try{ var v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function saveJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function saveCfg(){ saveJSON(LS_CFG, cfg); }
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+function clampWalk(v){ v = parseInt(v,10); if(!isFinite(v)||v<0) return 0; return Math.min(v,60); }
+cfg.items.forEach(function(it){ if(!it.uid) it.uid = uid(); it.walk = clampWalk(it.walk==null?10:it.walk); });
+
+function fetchJSON(url, ms){
+  var ctl = ("AbortController" in window) ? new AbortController() : null;
+  var tm = setTimeout(function(){ if(ctl) ctl.abort(); }, ms||12000);
+  return fetch(url, {cache:"no-store", signal: ctl?ctl.signal:undefined})
+    .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+    .finally(function(){ clearTimeout(tm); });
+}
+function hkTime(ms){
+  return new Date(ms).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",hour12:false,timeZone:"Asia/Hong_Kong"});
+}
+function hkTimeSec(ms){
+  return new Date(ms).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false,timeZone:"Asia/Hong_Kong"});
+}
+
+/* ---------------- bus helpers ---------------- */
+function stopName(co, id){
+  var k = co+":"+id;
+  if(stopCache[k]) return Promise.resolve(stopCache[k]);
+  var url = co==="KMB" ? KMB+"stop/"+encodeURIComponent(id) : CTB+"stop/"+encodeURIComponent(id);
+  return fetchJSON(url).then(function(j){
+    var d = j && j.data || {};
+    var v = {tc: d.name_tc||id, en: d.name_en||id};
+    stopCache[k] = v; saveJSON(LS_STOP, stopCache); return v;
+  });
+}
+function routeStops(co, route, dir, st){
+  var url = co==="KMB"
+    ? KMB+"route-stop/"+encodeURIComponent(route)+"/"+dir+"/"+(st||"1")
+    : CTB+"route-stop/CTB/"+encodeURIComponent(route)+"/"+dir;
+  return fetchJSON(url).then(function(j){
+    var arr = (j && j.data || []).slice().sort(function(a,b){ return (+a.seq)-(+b.seq); });
+    return Promise.all(arr.map(function(r){
+      return stopName(co, r.stop).then(function(n){ return {id:r.stop, tc:n.tc, en:n.en}; })
+        .catch(function(){ return {id:r.stop, tc:r.stop, en:r.stop}; });
+    }));
+  });
+}
+function routeDirs(co, route){
+  // returns [{dir:'outbound'|'inbound', st:'1', dest:[tc,en]}]
+  if(co==="KMB"){
+    return getRouteList("KMB").then(function(list){
+      return list.filter(function(r){ return r.route===route; }).map(function(r){
+        return {dir: r.bound==="O"?"outbound":"inbound", st:r.service_type, dest:[r.dest_tc,r.dest_en], orig:[r.orig_tc,r.orig_en]};
+      }).sort(function(a,b){ return (+a.st)-(+b.st) || (a.dir<b.dir?1:-1); });
+    });
+  }
+  return fetchJSON(CTB+"route/CTB/"+encodeURIComponent(route)).then(function(j){
+    var d = j && j.data;
+    if(!d || !d.route) return [];
+    return [{dir:"outbound", st:"1", dest:[d.dest_tc,d.dest_en], orig:[d.orig_tc,d.orig_en]},
+            {dir:"inbound",  st:"1", dest:[d.orig_tc,d.orig_en], orig:[d.dest_tc,d.dest_en]}];
+  });
+}
+var routeListMem = {};
+function getRouteList(co){
+  if(routeListMem[co]) return Promise.resolve(routeListMem[co]);
+  var all = loadJSON(LS_ROUTES, {}) || {};
+  var today = new Date().toISOString().slice(0,10);
+  if(all[co] && all[co].d===today){ routeListMem[co] = all[co].list; return Promise.resolve(all[co].list); }
+  var url = co==="KMB" ? KMB+"route/" : CTB+"route/CTB";
+  return fetchJSON(url, 20000).then(function(j){
+    var list = (j && j.data || []).map(function(r){
+      return {route:r.route, bound:r.bound||"", service_type:r.service_type||"1",
+              orig_tc:r.orig_tc, orig_en:r.orig_en, dest_tc:r.dest_tc, dest_en:r.dest_en};
+    });
+    routeListMem[co] = list; all[co] = {d:today, list:list}; saveJSON(LS_ROUTES, all);
+    return list;
+  });
+}
+function matches(name, kw){
+  if(!kw) return false;
+  name = (name||"").toUpperCase(); kw = String(kw).toUpperCase();
+  return name.indexOf(kw) >= 0;
+}
+/* Turn a setup-code item (toward + stopKw) into concrete dir/stopId, once. */
+function resolveBus(it){
+  if(it.stopId && it.dir) return Promise.resolve(it);
+  return routeDirs(it.co, it.route).then(function(dirs){
+    var cand = dirs.filter(function(d){ return d.st===(it.st||"1") && (matches(d.dest[0],it.toward)||matches(d.dest[1],it.toward)); });
+    if(!cand.length) cand = dirs.filter(function(d){ return matches(d.dest[0],it.toward)||matches(d.dest[1],it.toward); });
+    if(!cand.length) throw new Error("dir");
+    var d = cand[0];
+    return routeStops(it.co, it.route, d.dir, d.st).then(function(stops){
+      var s = stops.filter(function(x){ return matches(x.tc,it.stopKw)||matches(x.en,it.stopKw); })[0];
+      if(!s) throw new Error("stop");
+      it.dir = d.dir; it.st = d.st; it.dest = d.dest; it.stopId = s.id; it.stopName = [s.tc, s.en];
+      saveCfg(); return it;
+    });
+  });
+}
+function busEta(it){
+  var url = it.co==="KMB"
+    ? KMB+"eta/"+encodeURIComponent(it.stopId)+"/"+encodeURIComponent(it.route)+"/"+(it.st||"1")
+    : CTB+"eta/CTB/"+encodeURIComponent(it.stopId)+"/"+encodeURIComponent(it.route);
+  var want = it.dir==="outbound" ? "O" : "I";
+  return fetchJSON(url).then(function(j){
+    var arr = (j && j.data || []).filter(function(e){
+      return e.dir===want && e.eta && (it.co!=="KMB" || String(e.service_type||"1")===String(it.st||"1"));
+    }).map(function(e){
+      return {t: Date.parse(e.eta), rmk:[e.rmk_tc||"", e.rmk_en||""], dest:[e.dest_tc||"", e.dest_en||""]};
+    }).filter(function(a){ return isFinite(a.t); }).sort(function(a,b){ return a.t-b.t; });
+    return {arrivals: arr};
+  });
+}
+
+/* ---------------- MTR ---------------- */
+function mtrEta(it){
+  var url = MTR+"?line="+it.line+"&sta="+it.sta+"&lang="+(cfg.lang==="zh"?"TC":"EN");
+  return fetchJSON(url).then(function(j){
+    var out = {dirs:{}, alert:null, delay: j && j.isdelay==="Y"};
+    if(!j) throw new Error("empty");
+    if(String(j.status)==="0"){
+      out.alert = {msg: j.message || "", url: j.url || ""};
+    }
+    var d = j.data && j.data[it.line+"-"+it.sta] || {};
+    ["UP","DOWN"].forEach(function(k){
+      out.dirs[k] = (d[k]||[]).filter(function(x){ return x.valid!=="N" && x.time; }).map(function(x){
+        return {t: Date.parse(x.time.replace(" ","T")+"+08:00"), dest:x.dest, plat:x.plat};
+      }).filter(function(a){ return isFinite(a.t); }).sort(function(a,b){ return a.t-b.t; });
+    });
+    return out;
+  });
+}
+
+/* ---------------- fetch loop ---------------- */
+function refresh(){
+  if(fetching) return;
+  if(!cfg.items.length){ render(); return; }
+  fetching = true; lastTry = Date.now(); anyErr = false; setStatus();
+  var jobs = cfg.items.map(function(it){
+    var p;
+    if(it.type==="mtr") p = mtrEta(it);
+    else p = resolveBus(it).then(busEta);
+    return p.then(function(r){ r.ok = true; r.stale = false; results[it.uid] = r; })
+      .catch(function(e){
+        anyErr = true;
+        var prev = results[it.uid];
+        var nf = e && (e.message==="stop" || e.message==="dir");
+        results[it.uid] = prev && prev.ok && !nf ? Object.assign({}, prev, {stale:true}) : {ok:false, error: nf ? "nf" : "net"};
+      });
+  });
+  Promise.all(jobs).then(function(){
+    fetching = false;
+    if(cfg.items.some(function(it){ var r = results[it.uid]; return r && r.ok && !r.stale; })) lastOk = Date.now();
+    render();
+  });
+}
+function setStatus(){
+  var dot = $("s-dot"), tx = $("s-text");
+  if(fetching){ dot.className="dot load"; tx.textContent = L().loading; return; }
+  if(anyErr){ dot.className="dot err"; tx.textContent = L().failed + (lastOk? " · "+L().updated+" "+hkTimeSec(lastOk):""); return; }
+  dot.className="dot"; tx.textContent = lastOk ? L().updated+" "+hkTimeSec(lastOk) : "";
+}
+
+/* ---------------- render ---------------- */
+function minsUntil(t){ return Math.floor((t - Date.now())/60000); }
+function pick(arrivals, walk){
+  var now = Date.now();
+  var upcoming = arrivals.filter(function(a){ return a.t > now - 30000; });
+  var next = upcoming[0] || null;
+  var catchable = upcoming.filter(function(a){ return (a.t-now)/60000 >= walk; })[0] || null;
+  return {next:next, catchable:catchable};
+}
+function rowHTML(label, arrivals, walk, extra){
+  var p = pick(arrivals, walk), h = '<div class="row"><div>';
+  if(label) h += '<div class="dirlbl">'+esc(label)+'</div>';
+  var a = p.catchable;
+  if(a){
+    var arrM = Math.max(0, minsUntil(a.t)), leave = arrM - walk;
+    var cls = leave<=0 ? "now" : leave<=3 ? "soon" : "ok";
+    h += '<div class="leave '+cls+'">'+esc(leave<=0 ? L().leaveNow : L().leaveIn(leave))+'</div>';
+    if(p.next && p.next!==a) h += '<div class="note">'+esc(L().noCatch(Math.max(0,minsUntil(p.next.t))))+'</div>';
+    var ex = extra ? extra(a) : "";
+    if(ex) h += '<div class="note">'+esc(ex)+'</div>';
+    h += '</div><div class="arr">'+esc(L().at)+' <b>'+esc(L().arrIn(arrM))+'</b><br>'+hkTime(a.t)+'</div></div>';
+  } else if(p.next){
+    h += '<div class="leave none">'+esc(L().noCatch(Math.max(0,minsUntil(p.next.t))))+'</div>';
+    h += '</div><div class="arr">'+hkTime(p.next.t)+'</div></div>';
+  } else {
+    h += '<div class="leave none">'+esc(L().noSvc)+'</div></div></div>';
+  }
+  return h;
+}
+function render(){
+  setStatus();
+  document.title = L().title; $("h-title").textContent = L().title;
+  $("b-lang").textContent = cfg.lang==="zh" ? "EN" : "中";
+  $("foot").innerHTML = esc(L().src)+'<br><a href="'+(cfg.lang==="zh"?"https://www.mtr.com.hk/ch/customer/main/service_status.html":"https://www.mtr.com.hk/en/customer/main/service_status.html")+'" target="_blank" rel="noopener">'+esc(L().mtrLink)+' ↗</a>';
+  var cards = $("cards");
+  if(!cfg.items.length){
+    cards.innerHTML = '<div class="card empty"><p>'+esc(L().empty)+'</p><button type="button" class="btn" id="b-empty">'+esc(L().openSettings)+'</button></div>';
+    $("b-empty").addEventListener("click", openSettings);
+    $("alerts").innerHTML = ""; return;
+  }
+  var alerts = [], seenLine = {}, hasMtr = false, h = "";
+  cfg.items.forEach(function(it){
+    var r = results[it.uid];
+    var walkChip = '<span class="walk">🚶 '+esc(L().walk(it.walk))+'</span>';
+    if(it.type==="mtr"){
+      hasMtr = true;
+      var ln = LINES[it.line] || {n:[it.line,it.line],c:"#555",up:[],dn:[]};
+      h += '<div class="card"><div class="chead"><span class="badge" style="background:'+ln.c+'">'+esc(it.line)+'</span>'+
+           '<div class="ctitle"><div class="t1">'+esc(li(STA[it.sta]||[it.sta,it.sta]))+'</div><div class="t2">'+esc(li(ln.n))+'</div></div>'+walkChip+'</div>';
+      if(!r) h += '<div class="note">'+esc(L().loadingS)+'</div>';
+      else if(!r.ok) h += '<div class="note err">'+esc(L().loadErr)+'</div>';
+      else {
+        var ks = it.dir==="UP" ? ["UP"] : it.dir==="DOWN" ? ["DOWN"] : ["UP","DOWN"];
+        ks.forEach(function(k){
+          var arr = r.dirs[k]||[];
+          var terms = (k==="UP"?ln.up:ln.dn).map(function(c){ return li(STA[c]||[c,c]); }).join(" / ");
+          if(!arr.length && ks.length>1 && (k==="UP"?ln.up:ln.dn).indexOf(it.sta)>=0) return; // terminus
+          h += rowHTML(L().to(terms), arr, it.walk, function(a){
+            var parts = [];
+            if(a.dest && (k==="UP"?ln.up:ln.dn).length>1) parts.push(L().to(li(STA[a.dest]||[a.dest,a.dest])));
+            if(a.plat) parts.push(L().plat(a.plat));
+            return parts.join(" · ");
+          });
+        });
+        if(!seenLine[it.line]){
+          seenLine[it.line] = 1;
+          if(r.alert && r.alert.msg) alerts.push('⚠️ <b>'+esc(li(ln.n))+'</b>: '+esc(r.alert.msg)+(r.alert.url?' <a href="'+esc(r.alert.url)+'" target="_blank" rel="noopener">↗</a>':''));
+          else if(r.delay) alerts.push('⚠️ '+esc(L().delay(li(ln.n))));
+        }
+      }
+      h += '</div>';
+    } else {
+      var title = it.route + (it.dest ? "  "+L().to(li(it.dest)) : "");
+      h += '<div class="card"><div class="chead"><span class="badge '+(it.co==="CTB"?"ctb":"kmb")+'">'+esc(it.route)+'</span>'+
+           '<div class="ctitle"><div class="t1">'+esc(it.dest ? L().to(li(it.dest)) : it.route)+'</div><div class="t2">'+esc(it.stopName ? li(it.stopName) : (it.stopKw||""))+' · '+(it.co==="CTB"?(cfg.lang==="zh"?"城巴":"Citybus"):(cfg.lang==="zh"?"九巴":"KMB"))+'</div></div>'+walkChip+'</div>';
+      if(!r) h += '<div class="note">'+esc(L().loadingS)+'</div>';
+      else if(!r.ok) h += '<div class="note err">'+esc(r.error==="nf" ? L().stopNF : L().loadErr)+'</div>';
+      else h += rowHTML("", r.arrivals, it.walk, function(a){ return li(a.rmk); });
+      h += '</div>';
+    }
+  });
+  cards.innerHTML = h;
+  if(alerts.length) $("alerts").innerHTML = '<div class="alert" role="status">'+alerts.join("<br>")+'</div>';
+  else $("alerts").innerHTML = hasMtr && Object.keys(seenLine).length ? '<div class="alert ok">✓ '+esc(L().mtrOk)+'</div>' : "";
+}
+
+/* ---------------- settings ---------------- */
+function itemLabel(it){
+  if(it.type==="mtr"){
+    var ln = LINES[it.line];
+    var d = it.dir==="UP" ? L().to((ln.up).map(function(c){return li(STA[c]);}).join("/")) : it.dir==="DOWN" ? L().to((ln.dn).map(function(c){return li(STA[c]);}).join("/")) : L().both;
+    return {a:(cfg.lang==="zh"?"港鐵 ":"MTR ")+li(STA[it.sta])+" · "+li(ln.n), b:d+" · "+L().walk(it.walk)};
+  }
+  return {a:(it.co==="CTB"?(cfg.lang==="zh"?"城巴 ":"Citybus "):(cfg.lang==="zh"?"九巴 ":"KMB "))+it.route+(it.dest?" "+L().to(li(it.dest)):(it.toward?" "+L().to(it.toward):"")),
+          b:(it.stopName?li(it.stopName):(it.stopKw||""))+" · "+L().walk(it.walk)};
+}
+function renderSettings(){
+  var t = L();
+  $("st-title").textContent = t.settings; $("st-done").textContent = t.done;
+  $("st-lang-h").textContent = t.lang; $("st-items-h").textContent = t.items;
+  $("st-add-bus").textContent = t.addBus; $("st-add-mtr").textContent = t.addMtr;
+  $("st-code-h").textContent = t.code; $("st-code-hint").textContent = t.codeHint;
+  $("st-import").textContent = t.imp; $("st-export").textContent = t.exp; $("st-reset").textContent = t.reset;
+  Array.prototype.forEach.call($("st-lang").querySelectorAll("button"), function(b){ b.setAttribute("aria-pressed", String(b.dataset.lang===cfg.lang)); });
+  var box = $("st-items");
+  box.innerHTML = cfg.items.map(function(it, i){
+    var lb = itemLabel(it);
+    return '<div class="item"><div class="lbl">'+esc(lb.a)+'<small>'+esc(lb.b)+'</small></div>'+
+      '<button type="button" class="sm" data-act="up" data-i="'+i+'" aria-label="Move up"'+(i===0?' disabled':'')+'>↑</button>'+
+      '<button type="button" class="sm" data-act="dn" data-i="'+i+'" aria-label="Move down"'+(i===cfg.items.length-1?' disabled':'')+'>↓</button>'+
+      '<button type="button" class="sm" data-act="ed" data-i="'+i+'">'+esc(t.edit)+'</button>'+
+      '<button type="button" class="sm" data-act="rm" data-i="'+i+'" aria-label="'+esc(t.del)+'">✕</button></div>';
+  }).join("") || '<div class="hint">—</div>';
+}
+function openSettings(){ renderSettings(); $("st-msg").textContent=""; $("settings").classList.add("open"); }
+function closeSettings(){ $("settings").classList.remove("open"); render(); refresh(); }
+
+function encodeCode(){
+  var items = cfg.items.map(function(it){ var c = Object.assign({}, it); delete c.uid; return c; });
+  return btoa(unescape(encodeURIComponent(JSON.stringify({v:1, items:items}))));
+}
+function decodeCode(s){
+  s = String(s||"").replace(/\s+/g,"");
+  var o = JSON.parse(decodeURIComponent(escape(atob(s))));
+  if(!o || !Array.isArray(o.items)) throw new Error("bad");
+  var items = o.items.filter(function(it){
+    if(!it || typeof it!=="object") return false;
+    if(it.type==="mtr") return LINES[it.line] && STA[it.sta];
+    return it.type==="bus" && (it.co==="KMB"||it.co==="CTB") && typeof it.route==="string" && it.route.length<8;
+  }).map(function(it){ it.uid = uid(); it.walk = clampWalk(it.walk==null?10:it.walk); return it; });
+  if(!items.length) throw new Error("empty");
+  return items;
+}
+
+/* ---------------- editor ---------------- */
+var edIndex = -1, edType = "bus", edToken = 0, rlToken = 0;
+function opt(v, label, sel){ return '<option value="'+esc(v)+'"'+(sel?' selected':'')+'>'+esc(label)+'</option>'; }
+function openEditor(type, index){
+  edType = type; edIndex = index; edToken++;
+  var t = L(), it = index>=0 ? cfg.items[index] : null;
+  $("ed-title").textContent = type==="bus" ? t.editBus : t.editMtr;
+  $("ed-cancel").textContent = t.cancel; $("ed-save").textContent = t.save;
+  ["co","route","dir","stop","line","sta","mdir"].forEach(function(k){ $("l-"+k).textContent = t[k]; });
+  $("l-walk").textContent = t.walkMin; $("ed-msg").textContent = "";
+  $("ed-walk").value = it ? it.walk : 10;
+  $("ed-bus").style.display = type==="bus" ? "" : "none";
+  $("ed-mtr").style.display = type==="mtr" ? "" : "none";
+  if(type==="mtr"){
+    $("ed-line").innerHTML = Object.keys(LINES).map(function(k){ return opt(k, li(LINES[k].n), it ? it.line===k : k==="TML"); }).join("");
+    fillStations(it ? it.sta : "TKW", it ? it.dir : "both");
+  } else {
+    $("ed-co").value = it ? it.co : "KMB";
+    $("ed-route").value = it ? it.route : "";
+    $("ed-dir").innerHTML = opt("", t.choose); $("ed-stop").innerHTML = opt("", t.choose);
+    loadRouteList();
+    if(it && it.dir) loadDirs(it.dir+"|"+(it.st||"1"), it.stopId);
+    else if(it) loadDirs();
+  }
+  $("editor").classList.add("open");
+  setTimeout(function(){ (type==="bus" ? $("ed-route") : $("ed-line")).focus(); }, 50);
+}
+function closeEditor(){ $("editor").classList.remove("open"); edToken++; }
+function fillStations(selSta, selDir){
+  var line = $("ed-line").value, ln = LINES[line];
+  var codes = ln.s.split(" ");
+  if(codes.indexOf(selSta)<0) selSta = codes[0];
+  $("ed-sta").innerHTML = codes.map(function(c){ return opt(c, li(STA[c]), c===selSta); }).join("");
+  var up = ln.up.map(function(c){return li(STA[c]);}).join(" / "), dn = ln.dn.map(function(c){return li(STA[c]);}).join(" / ");
+  $("ed-mdir").innerHTML = opt("both", L().both, !selDir||selDir==="both") + opt("UP", L().to(up), selDir==="UP") + opt("DOWN", L().to(dn), selDir==="DOWN");
+}
+function loadRouteList(){
+  var co = $("ed-co").value, tok = ++rlToken;
+  getRouteList(co).then(function(list){
+    if(tok!==rlToken) return;
+    var seen = {}, h = "";
+    list.forEach(function(r){ if(!seen[r.route]){ seen[r.route]=1; h += '<option value="'+esc(r.route)+'">'; } });
+    $("ed-routes").innerHTML = h;
+  }).catch(function(){});
+}
+function loadDirs(selDir, selStop){
+  var co = $("ed-co").value, route = $("ed-route").value.trim().toUpperCase(), tok = ++edToken, t = L();
+  $("ed-stop").innerHTML = opt("", t.choose);
+  if(!route){ $("ed-dir").innerHTML = opt("", t.choose); return; }
+  $("ed-dir").innerHTML = opt("", t.loadingS); $("ed-msg").textContent = "";
+  routeDirs(co, route).then(function(dirs){
+    if(tok!==edToken) return;
+    if(!dirs.length){ $("ed-dir").innerHTML = opt("", t.choose); $("ed-msg").textContent = t.routeNF; return; }
+    $("ed-dir").innerHTML = opt("", t.choose) + dirs.map(function(d){
+      var v = d.dir+"|"+d.st;
+      return opt(v, t.to(li(d.dest)) + (d.st!=="1" ? " ("+t.special+" "+d.st+")" : ""), v===selDir);
+    }).join("");
+    $("ed-dir")._dirs = dirs;
+    if(selDir) loadStops(selStop);
+  }).catch(function(){ if(tok===edToken){ $("ed-dir").innerHTML = opt("", t.choose); $("ed-msg").textContent = t.loadErr; } });
+}
+function loadStops(selStop){
+  var co = $("ed-co").value, route = $("ed-route").value.trim().toUpperCase(), v = $("ed-dir").value, tok = ++edToken, t = L();
+  if(!v){ $("ed-stop").innerHTML = opt("", t.choose); return; }
+  var p = v.split("|");
+  $("ed-stop").innerHTML = opt("", t.loadingS);
+  routeStops(co, route, p[0], p[1]).then(function(stops){
+    if(tok!==edToken) return;
+    $("ed-stop").innerHTML = opt("", t.choose) + stops.map(function(s, i){
+      return opt(s.id, (i+1)+". "+li([s.tc, s.en]), s.id===selStop);
+    }).join("");
+    $("ed-stop")._stops = stops;
+    if(!stops.length) $("ed-msg").textContent = t.routeNF;
+  }).catch(function(){ if(tok===edToken){ $("ed-stop").innerHTML = opt("", t.choose); $("ed-msg").textContent = t.loadErr; } });
+}
+function saveEditor(e){
+  e.preventDefault();
+  var t = L(), walk = clampWalk($("ed-walk").value), item;
+  $("ed-walk").value = walk;
+  if(edType==="mtr"){
+    item = {type:"mtr", line:$("ed-line").value, sta:$("ed-sta").value, dir:$("ed-mdir").value||"both", walk:walk};
+  } else {
+    var v = $("ed-dir").value, sid = $("ed-stop").value;
+    if(!v || !sid){ $("ed-msg").textContent = t.needAll; return; }
+    var p = v.split("|"), dirs = $("ed-dir")._dirs || [], stops = $("ed-stop")._stops || [];
+    var d = dirs.filter(function(x){ return x.dir===p[0] && x.st===p[1]; })[0];
+    var s = stops.filter(function(x){ return x.id===sid; })[0];
+    if(!d || !s){ $("ed-msg").textContent = t.needAll; return; }
+    item = {type:"bus", co:$("ed-co").value, route:$("ed-route").value.trim().toUpperCase(), dir:p[0], st:p[1],
+            dest:d.dest, toward:d.dest[0], stopId:s.id, stopName:[s.tc,s.en], stopKw:s.tc, walk:walk};
+  }
+  if(edIndex>=0){ item.uid = cfg.items[edIndex].uid; delete results[item.uid]; cfg.items[edIndex] = item; }
+  else { item.uid = uid(); cfg.items.push(item); }
+  saveCfg(); closeEditor(); renderSettings();
+}
+
+/* ---------------- events ---------------- */
+$("b-refresh").addEventListener("click", function(){ refresh(); });
+$("b-settings").addEventListener("click", openSettings);
+$("b-lang").addEventListener("click", function(){ cfg.lang = cfg.lang==="zh"?"en":"zh"; saveCfg(); render(); refresh(); });
+$("st-done").addEventListener("click", closeSettings);
+$("st-lang").addEventListener("click", function(e){
+  var b = e.target.closest("button"); if(!b) return;
+  cfg.lang = b.dataset.lang; saveCfg(); renderSettings();
+});
+$("st-items").addEventListener("click", function(e){
+  var b = e.target.closest("button"); if(!b) return;
+  var i = +b.dataset.i, a = b.dataset.act, arr = cfg.items;
+  if(a==="up" && i>0){ var x = arr[i-1]; arr[i-1] = arr[i]; arr[i] = x; }
+  else if(a==="dn" && i<arr.length-1){ var y = arr[i+1]; arr[i+1] = arr[i]; arr[i] = y; }
+  else if(a==="rm"){ if(!confirm(L().delQ)) return; arr.splice(i,1); }
+  else if(a==="ed"){ openEditor(arr[i].type, i); return; }
+  saveCfg(); renderSettings();
+});
+$("st-add-bus").addEventListener("click", function(){ openEditor("bus", -1); });
+$("st-add-mtr").addEventListener("click", function(){ openEditor("mtr", -1); });
+$("st-import").addEventListener("click", function(){
+  try{
+    var items = decodeCode($("st-code").value);
+    cfg.items = items; results = {}; saveCfg(); renderSettings();
+    $("st-msg").textContent = L().impOk; $("st-code").value = "";
+  }catch(e){ $("st-msg").textContent = L().impBad; }
+});
+$("st-export").addEventListener("click", function(){
+  var code = encodeCode(); $("st-code").value = code;
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(code).then(function(){ $("st-msg").textContent = L().copied; },
+      function(){ $("st-msg").textContent = L().copyManual; });
+  } else $("st-msg").textContent = L().copyManual;
+});
+$("st-reset").addEventListener("click", function(){
+  if(!confirm(L().resetQ)) return;
+  cfg.items = []; results = {}; saveCfg(); renderSettings();
+});
+$("ed-cancel").addEventListener("click", closeEditor);
+$("ed-form").addEventListener("submit", saveEditor);
+$("ed-co").addEventListener("change", function(){ $("ed-route").value = ""; $("ed-dir").innerHTML = opt("", L().choose); $("ed-stop").innerHTML = opt("", L().choose); loadRouteList(); });
+$("ed-route").addEventListener("change", function(){ $("ed-route").value = $("ed-route").value.trim().toUpperCase(); loadDirs(); });
+$("ed-dir").addEventListener("change", function(){ loadStops(); });
+$("ed-line").addEventListener("change", function(){ fillStations(null, "both"); });
+document.addEventListener("keydown", function(e){
+  if(e.key!=="Escape") return;
+  if($("editor").classList.contains("open")) closeEditor();
+  else if($("settings").classList.contains("open")) closeSettings();
+});
+document.addEventListener("visibilitychange", function(){
+  if(document.visibilityState==="visible"){ render(); if(Date.now()-lastTry > 10000) refresh(); }
+});
+window.addEventListener("pageshow", function(){ if(Date.now()-lastTry > 10000) refresh(); });
+
+/* ---------------- start ---------------- */
+render(); refresh();
+setInterval(function(){ if(document.visibilityState==="visible") refresh(); }, FETCH_EVERY);
+setInterval(function(){ if(document.visibilityState==="visible" && !fetching) render(); }, RENDER_EVERY);
+})();
+</script>
+</body>
+</html>
